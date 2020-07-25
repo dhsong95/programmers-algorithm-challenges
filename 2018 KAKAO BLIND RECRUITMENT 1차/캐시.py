@@ -1,26 +1,4 @@
-def update_cache(cache, city, size):
-    time = 5
-    if size == 0:
-        return time
 
-    if city in cache:
-        time = 1
-        index = cache.index(city)
-        cache.pop(index)
-    else:
-        if len(cache) >= size:
-            cache.pop(0)
-
-    cache.append(city)
-    return time
-
-
-def solution(cacheSize, cities):
-    cache = list()
-    time = 0
-    for city in cities:
-        time += update_cache(cache, city.lower(), cacheSize)
-    return time
 
 
 if __name__ == "__main__":
