@@ -1,12 +1,3 @@
-from collections import Counter
-import re
-
-
-def solution(s):
-    nums = re.findall(r'[\d]+', s)
-    counter = Counter(nums)
-    return [int(item[0]) for item in counter.most_common()]
-
 
 if __name__ == '__main__':
     assert solution('{{2},{2,1},{2,1,3},{2,1,3,4}}') == [2, 1, 3, 4]
