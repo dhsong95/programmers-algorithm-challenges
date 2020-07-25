@@ -1,3 +1,13 @@
+def solution(n, arr1, arr2):
+    maps = list()
+    for a, b in zip(arr1, arr2):
+        row = str(bin(a | b))[2:]
+        row = '0' * (n - len(row)) + row
+        row = row.replace('0', ' ')
+        row = row.replace('1', '#')
+        maps.append(row)
+
+    return maps
 
 
 if __name__ == "__main__":

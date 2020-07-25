@@ -1,4 +1,47 @@
+import datetime
 
+
+def transform_datetime(line):
+    times = line.split()
+    duration = datetime.timedelta(seconds=float(times[-1][:-1]))
+    end = datetime.datetime.strptime(
+        ' '.join(times[:2]),
+        '%Y-%m-%d %H:%M:%S.%f'
+    )
+    start = end - duration + datetime.timedelta(seconds=0.001)
+
+    return (start, end)
+
+
+def within_second(base, start, end):
+    if base <= start <= base + datetime.timedelta(seconds=0.999):
+        return True
+    if base <= end <= base + datetime.timedelta(seconds=0.999):
+        return True
+    if start <= base and base + datetime.timedelta(seconds=0.999) <= end:
+        return True
+
+    return False
+
+
+def solution(lines):
+    times = list()
+    for line in lines:
+        times.append(transform_datetime(line))
+
+    counter = 0
+    for base_start, base_end in times:
+        counter_start = 0
+        counter_end = 0
+        for start, end in times:
+            if within_second(base_start, start, end):
+                counter_start += 1
+            if within_second(base_end, start, end):
+                counter_end += 1
+
+        counter = max(counter, counter_start, counter_end)
+
+    return counter
 
 
 if __name__ == '__main__':
