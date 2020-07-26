@@ -1,23 +1,23 @@
 def solution(msg):
-    alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    alphabet_code = {alphabet: idx+1 for idx, alphabet in enumerate(alphabets)}
+    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    codebook = {ch: idx+1 for idx, ch in enumerate(alphabet)}
 
     index = 0
-    character = ''
-    compressed_msg = list()
+    target = ''
+    code = list()
     while index < len(msg):
-        if character + msg[index] in alphabet_code.keys():
-            character += msg[index]
+        ch = msg[index]
+        if target + ch in codebook:
+            target += ch
         else:
-            compressed_msg.append(alphabet_code[character])
-            alphabet_code[character + msg[index]] = len(alphabet_code) + 1
-            character = msg[index]
+            code.append(codebook[target])
+            codebook[target+ch] = len(codebook) + 1
+            target = ch
         index += 1
 
-    if character:
-        compressed_msg.append(alphabet_code[character])
+    code.append(codebook[target])
 
-    return compressed_msg
+    return code
 
 
 if __name__ == "__main__":

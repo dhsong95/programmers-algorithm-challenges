@@ -1,7 +1,7 @@
 import re
 
 
-def transform_file(filename):
+def get_fileinfo(filename):
     filename = filename.lower()
     pattern = r'([^\d]+)([\d]{1,5})(.*)'
     head, number, tail = re.search(pattern, filename).groups()
@@ -9,12 +9,11 @@ def transform_file(filename):
 
 
 def solution(files):
-    file_info = list()
+    fileinfo = list()
     for index, filename in enumerate(files):
-        head, number, _ = transform_file(filename)
-        file_info.append((head, int(number), index))
-
-    return [files[index] for _, _, index in sorted(file_info)]
+        head, number, _ = get_fileinfo(filename)
+        fileinfo.append((head, int(number), index))
+    return [files[index] for _, _, index in sorted(fileinfo)]
 
 
 if __name__ == "__main__":

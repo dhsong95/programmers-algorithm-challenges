@@ -1,54 +1,42 @@
-def transform_musicinfo(musicinfo):
+def replace_chord_sharp(melody):
+    for chord in 'ABCDEFG':
+        chord_sharp = chord + '#'
+        melody = melody.replace(chord_sharp, chord.lower())
+    return melody
+
+
+def get_musicinfo(musicinfo):
     start, end, title, melody = musicinfo.split(',')
+    melody = replace_chord_sharp(melody)
     return start, end, title, melody
 
 
 def get_duration(start, end):
-    start_hour, start_minute = start.split(':')
-    end_hour, end_minute = end.split(':')
+    start = [int(t) for t in start.split(':')]
+    end = [int(t) for t in end.split(':')]
 
-    start_hour = int(start_hour)
-    start_minute = int(start_minute)
-    end_hour = int(end_hour)
-    end_minute = int(end_minute)
-
-    duration = \
-        ((end_hour * 60) + end_minute) - ((start_hour * 60) + start_minute)
-
-    return duration
+    return (end[0] * 60 + end[1]) - (start[0] * 60 + start[1])
 
 
 def repeat_melody(melody, duration):
-
     q = duration // len(melody)
     r = duration % len(melody)
 
     return melody * q + melody[:r]
 
 
-def replace_melody_sharp(melody):
-    chords = 'ABCDEFG'
-    for chord in chords:
-        chord_sharp = chord + '#'
-        melody = melody.replace(chord_sharp, chord.lower())
-
-    return melody
-
-
 def solution(m, musicinfo):
+    m = replace_chord_sharp(m)
     target_title = '(None)'
     target_duration = 0
 
-    m = replace_melody_sharp(m)
-
     for music in musicinfo:
-        start, end, title, melody = transform_musicinfo(music)
-        melody = replace_melody_sharp(melody)
+        start, end, title, melody = get_musicinfo(music)
         duration = get_duration(start, end)
         melody = repeat_melody(melody, duration)
 
         index = melody.find(m)
-        if index != -1 and duration > target_duration:
+        if index >= 0 and target_duration < duration:
             target_title = title
             target_duration = duration
 

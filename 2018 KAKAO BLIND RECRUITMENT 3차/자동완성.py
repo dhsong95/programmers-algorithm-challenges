@@ -1,7 +1,7 @@
 class Node:
     def __init__(self, data):
         self.data = data
-        self.children = {}
+        self.children = dict()
         self.counter = 0
 
 
@@ -10,22 +10,21 @@ class Trie:
         self.root = Node(None)
 
     def insert(self, word):
-        current = self.root
-        for character in word:
-            if character not in current.children.keys():
-                current.children[character] = Node(character)
-            current = current.children[character]
-            current.counter += 1
+        node = self.root
+        for ch in word:
+            if ch not in node.children:
+                node.children[ch] = Node(ch)
+            node = node.children[ch]
+            node.counter += 1
 
     def get_prefix(self, word):
-        current = self.root
+        node = self.root
         prefix = ''
-        for character in word:
-            if prefix == word or current.counter == 1:
+        for ch in word:
+            if prefix == word or node.counter == 1:
                 break
-
-            prefix += character
-            current = current.children[character]
+            prefix += ch
+            node = node.children[ch]
 
         return prefix
 
@@ -40,7 +39,7 @@ def solution(words):
         prefix = trie.get_prefix(word)
         prefix_list.append(prefix)
 
-    return sum([len(p) for p in prefix_list])
+    return sum([len(prefix) for prefix in prefix_list])
 
 
 if __name__ == "__main__":

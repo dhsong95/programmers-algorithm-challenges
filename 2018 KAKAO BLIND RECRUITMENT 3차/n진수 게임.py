@@ -1,20 +1,19 @@
-def nubmer_to_nary(number, n):
-    digits = '0123456789ABCDEF'
-
+def decimal_to_nary(number, n):
     if number == 0:
-        return digits[0]
+        return '0'
 
+    digit = '0123456789ABCDEF'
     nary = ''
 
     while True:
         q = number // n
         r = number % n
 
-        nary += str(digits[r])
+        nary += digit[r]
 
         if q < n:
             if q != 0:
-                nary += str(digits[q])
+                nary += digit[q]
             break
 
         number = q
@@ -23,15 +22,15 @@ def nubmer_to_nary(number, n):
 
 
 def solution(n, t, m, p):
-    turn = 1
     number = 0
+    turn = 1
     answer = ''
 
     while len(answer) < t:
-        number_nary = nubmer_to_nary(number, n)
-        for index in range(len(number_nary)):
+        number_nary = decimal_to_nary(number, n)
+        for digit in number_nary:
             if turn == p:
-                answer += number_nary[index]
+                answer += digit
 
             if len(answer) == t:
                 break
