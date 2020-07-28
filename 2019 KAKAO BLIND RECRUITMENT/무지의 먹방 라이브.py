@@ -2,20 +2,20 @@ import heapq
 
 
 def solution(food_times, k):
-    foods = [(time, idx+1) for idx, time in enumerate(food_times)]
+    foods = [(food_time, idx+1) for idx, food_time in enumerate(food_times)]
     heapq.heapify(foods)
 
     time = 0
-    food_time_prev = 0
+    prev_food_time = 0
 
     while foods:
         cycle = len(foods)
         food_time = foods[0][0]
-
-        time += (food_time - food_time_prev) * cycle
+        time += (cycle * (food_time - prev_food_time))
 
         if time <= k:
-            food_time_prev, _ = heapq.heappop(foods)
+            prev_food_time = food_time
+            heapq.heappop(foods)
         else:
             break
 

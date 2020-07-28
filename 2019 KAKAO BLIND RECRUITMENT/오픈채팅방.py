@@ -1,20 +1,18 @@
 def solution(record):
     logs = list()
-    user_info = dict()
-    for r in record:
-        log_info = r.split()
-        if log_info[0].lower() in ['enter', 'leave']:
-            logs.append((log_info[1], log_info[0]))
-        if len(log_info) == 3:
-            user_info[log_info[1]] = log_info[2]
+    nicknames = dict()
+    for rec in record:
+        rec = rec.split()
+        if len(rec) == 3:
+            nicknames[rec[1]] = rec[2]
+        if rec[0] in ['Enter', 'Leave']:
+            log = [rec[1], '님이 들어왔습니다.' if rec[0] == 'Enter' else '님이 나갔습니다.']
+            logs.append(log)
 
-    result = list()
-    for user_id, operation in logs:
-        log_str = user_info[user_id] + '님이 '
-        log_str += ('들어왔습니다.' if operation.lower() == 'enter' else '나갔습니다.')
-        result.append(log_str)
+    for idx, (user, msg) in enumerate(logs):
+        logs[idx] = nicknames[user] + msg
 
-    return result
+    return logs
 
 
 if __name__ == "__main__":

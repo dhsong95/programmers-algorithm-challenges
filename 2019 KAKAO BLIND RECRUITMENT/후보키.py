@@ -1,35 +1,45 @@
-def solution(relation):
+def check_uniqueness(column_indices, relation):
     n_row = len(relation)
-    n_col = len(relation[0])
+
+    new_rows = set()
+    for row in relation:
+        new_row = ''
+        for cdx in column_indices:
+            new_row += row[cdx]
+        new_rows.add(new_row)
+
+    if len(new_rows) == n_row:
+        return True
+    else:
+        return False
+
+
+def solution(relation):
+    R = len(relation)
+    C = len(relation[0])
 
     candidates = list()
+    for num in range(1, int('1'*C, 2)+1):
+        combination_bit = bin(num)[2:]
+        combination_bit = '0'*(C-len(combination_bit)) + combination_bit
+        column_indices = set([
+            idx for idx, bit in enumerate(combination_bit) if bit == '1'
+        ])
 
-    for combination in range(1, int('1' * n_col, 2) + 1):
-        combination = bin(combination)[2:]
-        combination = '0' * (n_col - len(combination)) + combination
-        combination = [
-            index for index, bit in enumerate(combination) if bit == '1'
-        ]
+        if check_uniqueness(column_indices, relation):
+            candidates.append(column_indices)
 
-        new_rows = set()
-        for row in relation:
-            new_row = ''.join(row[index] for index in combination)
-            new_rows.add(new_row)
-
-        if len(new_rows) == n_row:
-            candidates.append(combination)
-
-    redundants = list()
-    for combination_src in candidates:
-        for combination_dst in candidates:
-            if set(combination_src) == set(combination_dst):
+    n_candidate = len(candidates)
+    deleted_candidates = list()
+    for idx in range(n_candidate):
+        for jdx in range(n_candidate):
+            if idx == jdx:
                 continue
+            if candidates[idx].issubset(candidates[jdx]):
+                if candidates[jdx] not in deleted_candidates:
+                    deleted_candidates.append(candidates[jdx])
 
-            if set(combination_src).issubset(set(combination_dst)):
-                if combination_dst not in redundants:
-                    redundants.append(combination_dst)
-
-    return len(candidates) - len(redundants)
+    return len(candidates) - len(deleted_candidates)
 
 
 if __name__ == "__main__":

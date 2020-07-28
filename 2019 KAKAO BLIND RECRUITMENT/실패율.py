@@ -1,20 +1,19 @@
 def solution(N, stages):
-    not_clear = {stage: 0 for stage in range(1, N+2)}
-    play = {stage: 0 for stage in range(1, N+2)}
+    stage_try = {stage: 0 for stage in range(1, N+2)}
+    stage_fail = {stage: 0 for stage in range(1, N+2)}
 
     for stage in stages:
-
         for s in range(1, stage+1):
-            play[s] += 1
+            stage_try[s] += 1
+        stage_fail[stage] += 1
 
-        not_clear[stage] += 1
-
-    failure = list()
+    scores = list()
     for stage in range(1, N+1):
-        failure_rate = not_clear[stage] / play[stage] if play[stage] else 0
-        failure.append((-failure_rate, stage))
+        score = stage_fail[stage] / stage_try[stage]\
+            if stage_try[stage] > 0 else 0
+        scores.append((-score, stage))
 
-    return [stage for _, stage in sorted(failure)]
+    return [stage for _, stage in sorted(scores)]
 
 
 if __name__ == "__main__":
