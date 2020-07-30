@@ -1,59 +1,67 @@
 from copy import deepcopy
 
 
-def rotate(key):
-    M = len(key)
-    key_rotated = [[0] * M for _ in range(M)]
+def zero_padding(lock, pad_size):
+    n_lock = len(lock)
+    size = len(lock) + (2 * pad_size)
+    lock_padded = [[0] * size for _ in range(size)]
 
-    for rdx in range(M):
-        for cdx in range(M):
-            key_rotated[cdx][M-rdx-1] = key[rdx][cdx]
-
-    return key_rotated
-
-
-def pad_lock(lock, size):
-    N = len(lock)
-    length = N + (2 * size)
-    lock_padded = [[0] * length for _ in range(length)]
-
-    for rdx in range(N):
-        for cdx in range(N):
-            lock_padded[rdx+size][cdx+size] = lock[rdx][cdx]
+    for idx in range(n_lock):
+        for jdx in range(n_lock):
+            lock_padded[idx+pad_size][jdx+pad_size] = lock[idx][jdx]
 
     return lock_padded
 
 
-def unlocked(lock, base, size):
-    for rdx in range(base, base+size):
-        for cdx in range(base, base+size):
-            if lock[rdx][cdx] == 0:
+def unlocked(pattern, lock_size, pad_size):
+    for idx in range(lock_size):
+        for jdx in range(lock_size):
+            if pattern[idx+pad_size][jdx+pad_size] == 0:
                 return False
     return True
 
 
-def turn_key(key, base_rdx, base_cdx, lock, M, N):
-    lock_copy = deepcopy(lock)
-    for rdx in range(M):
-        for cdx in range(M):
-            lock_copy[base_rdx+rdx][base_cdx+cdx] = \
-                key[rdx][cdx] ^ lock[base_rdx+rdx][base_cdx+cdx]
-    return unlocked(lock_copy, M-1, N)
+def make_pattern(base_idx, base_jdx, key, lock):
+    n_key = len(key)
+    pattern = deepcopy(lock)
+    for idx in range(n_key):
+        for jdx in range(n_key):
+            pattern[base_idx+idx][base_jdx+jdx] =\
+                lock[base_idx+idx][base_jdx+jdx] ^ key[idx][jdx]
+
+    return pattern
+
+
+def try_to_unlock(key, lock, n_key, n_lock):
+    for idx in range(n_key+n_lock-1):
+        for jdx in range(n_key+n_lock-1):
+            pattern = make_pattern(idx, jdx, key, lock)
+            if unlocked(pattern, n_lock, n_key-1):
+                return True
+    return False
+
+
+def rotate_key(key):
+    n_key = len(key)
+    key_rotated = [[0] * n_key for _ in range(n_key)]
+
+    for idx in range(n_key):
+        for jdx in range(n_key):
+            key_rotated[idx][jdx] = key[jdx][n_key-idx-1]
+
+    return key_rotated
 
 
 def solution(key, lock):
-    M = len(key)
-    N = len(lock)
+    n_key = len(key)
+    n_lock = len(lock)
 
-    lock = pad_lock(lock, M-1)
+    lock = zero_padding(lock, n_key-1)
 
     for _ in range(4):
-        key = rotate(key)
-
-        for rdx in range(M+N-1):
-            for cdx in range(M+N-1):
-                if turn_key(key, rdx, cdx, lock, M, N):
-                    return True
+        key = rotate_key(key)
+        if try_to_unlock(key, lock, n_key, n_lock):
+            return True
 
     return False
 

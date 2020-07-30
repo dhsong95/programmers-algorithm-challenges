@@ -1,33 +1,33 @@
 def solution(s):
-    result = len(s)
-    for length in range(1, (len(s)//2)+1):
+    length = len(s)
+    for size in range(1, len(s)//2+1):
         compressed = ''
-        token = ''
+        target = ''
         counter = 1
-        for idx in range(0, len(s), length):
-            if not token:
-                token = s[idx:idx+length]
+        for idx in range(0, len(s), size):
+            token = s[idx:idx+size]
+
+            if not target:
+                target = token
                 continue
 
-            if s[idx:idx+length] == token:
+            if token == target:
                 counter += 1
             else:
                 if counter >= 2:
-                    compressed += (str(counter) + token)
+                    compressed += (str(counter) + target)
                 else:
-                    compressed += token
-                token = s[idx:idx+length]
+                    compressed += target
+                target = token
                 counter = 1
 
         if counter >= 2:
-            compressed += (str(counter) + token)
+            compressed += (str(counter) + target)
         else:
-            compressed += token
+            compressed += target
 
-        result = len(compressed) if len(compressed) < result else result
-
-    return result
-
+        length = min(length, len(compressed))
+    return length
 
 if __name__ == "__main__":
     assert solution("aabbaccc") == 7

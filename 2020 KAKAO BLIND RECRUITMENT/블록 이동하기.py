@@ -1,130 +1,114 @@
 from collections import deque
 
 
-def visited(left, right, visited):
-    if visited[left[0]][left[1]] and visited[right[0]][right[1]]:
-        return True
-    else:
-        visited[left[0]][left[1]] = True
-        visited[right[0]][right[1]] = True
-        return False
-
-
-def is_horizontal(left, right):
+def horizontal_orientation(left, right):
     return left[0] == right[0]
 
 
-def check_boundary_valid(left, right, N):
-    return 0 <= left[0] < N and 0 <= left[1] < N and 0 <= right[0] < N and 0 <= right[1] < N
-
-
-def check_blocked_valid(board, left, right, other=None):
-    if other:
-        return board[left[0]][left[1]] == 0 and board[right[0]][right[1]] == 0 and board[other[0]][other[1]] == 0
-    else:
-        return board[left[0]][left[1]] == 0 and board[right[0]][right[1]] == 0
-
-
-def valid_move(left, right, board):
-    N = len(board)
-
-    if not check_boundary_valid(left, right, N):
+def visited(left, right, visited):
+    lx, ly = left
+    rx, ry = right
+    if not (visited[lx][ly] and visited[rx][ry]):
+        visited[lx][ly] = True
+        visited[rx][ry] = True
         return False
-    if not check_blocked_valid(left, right, board):
-        return False
-
     return True
 
 
-def shift(left, right, board):
+def in_boundary(left, right, board):
     N = len(board)
-    delta = [(0, 1), (0, -1), (-1, 0), (1, 0)]
-    locations = list()
-    for dl, dr in zip(delta, delta):
-        left_shifted = (left[0] + dl[0], left[1] + dl[1])
-        right_shifted = (right[0] + dr[0], right[1] + dr[1])
-
-        if not check_boundary_valid(left_shifted, right_shifted, N):
-            continue
-
-        if not check_blocked_valid(board, left_shifted, right_shifted):
-            continue
-
-        locations.append((left_shifted, right_shifted))
-
-    return locations
+    lx, ly = left
+    rx, ry = right
+    return 0 <= lx < N and 0 <= ly < N and 0 <= rx < N and 0 <= ry < N
 
 
-def rotate(left, right, board):
-    locations = list()
-    N = len(board)
-
-    if is_horizontal(left, right):
-        delta_left = [(0, 0), (0, 0), (-1, 1), (1, 1)]
-        delta_right = [(-1, -1), (1, -1), (0, 0), (0, 0)]
-        delta_other = [(-1, 1), (1, 1), (-1, 0), (1, 0)]
+def blocked(board, left, right, other=None):
+    lx, ly = left
+    rx, ry = right
+    if other:
+        ox, oy = other
+        return board[lx][ly] == 1 or board[rx][ry] == 1 or board[ox][oy] == 1
     else:
-        delta_left = [(0, 0), (0, 0), (1, 1), (1, -1)]
-        delta_right = [(-1, 1), (-1, -1), (0, 0), (0, 0)]
-        delta_other = [(1, 1), (1, -1), (0, 1), (0, -1)]
+        return board[lx][ly] == 1 or board[rx][ry]
 
-    for dl, dr, do in zip(delta_left, delta_right, delta_other):
-        left_rotated = (left[0] + dl[0], left[1] + dl[1])
-        right_rotated = (right[0] + dr[0], right[1] + dr[1])
-        left_rotated, right_rotated = min(left_rotated, right_rotated), max(left_rotated, right_rotated)
-        other = (left[0] + do[0], left[1] + do[1])
 
-        if not check_boundary_valid(left_rotated, right_rotated, N):
+def shift_move(left, right, board):
+    delta = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    moves = list()
+    for ld, rd in zip(delta, delta):
+        sh_left = (left[0] + ld[0], left[1] + ld[1])
+        sh_right = (right[0] + rd[0], right[1] + rd[1])
+
+        if not in_boundary(sh_left, sh_right, board):
             continue
 
-        if not check_blocked_valid(board, left_rotated, right_rotated, other):
+        if blocked(board, sh_left, sh_right):
             continue
 
-        locations.append((left_rotated, right_rotated))
+        moves.append((sh_left, sh_right))
 
-    return locations
+    return moves
+
+
+def rotate_move(left, right, board):
+    moves = list()
+    if horizontal_orientation(left, right):
+        l_delta = [(0, 0), (0, 0), (1, 1), (-1, 1)]
+        r_delta = [(1, -1), (-1, -1), (0, 0), (0, 0)]
+        o_delta = [(1, 1), (-1, 1), (1, 0), (-1, 0)]
+    else:
+        l_delta = [(0, 0), (0, 0), (1, -1), (1, 1)]
+        r_delta = [(-1, 1), (-1, -1), (0, 0), (0, 0)]
+        o_delta = [(1, 1), (1, -1), (0, -1), (0, 1)]
+
+    for ld, rd, od in zip(l_delta, r_delta, o_delta):
+        rt_left = (left[0] + ld[0], left[1] + ld[1])
+        rt_right = (right[0] + rd[0], right[1] + rd[1])
+        other = (left[0] + od[0], left[1] + od[1])
+
+        if not in_boundary(rt_left, rt_right, board):
+            continue
+
+        if blocked(board, rt_left, rt_right, other):
+            continue
+
+        rt_left, rt_right = min(rt_left, rt_right), max(rt_left, rt_right)
+        moves.append((rt_left, rt_right))
+
+    return moves
 
 
 def solution(board):
     N = len(board)
-    left = (0, 0)
-    right = (0, 1)
 
-    location = (left, right)
+    h_visited = [[False] * N for _ in range(N)]
+    v_visited = [[False] * N for _ in range(N)]
 
+    queue = deque([((0, 0), (0, 1))])
     counter = 0
-
-    queue = deque([location])
-
-    visited_horizontal = [[False] * (N) for _ in range(N)]
-    visited_vertical = [[False] * (N) for _ in range(N)]
-
-    visited_horizontal[0][0] = True
-    visited_horizontal[0][1] = True
 
     while queue:
         length = len(queue)
-
         for _ in range(length):
             left, right = queue.popleft()
+
             if left == (N-1, N-1) or right == (N-1, N-1):
                 return counter
 
-            for left_shifted, right_shifted in shift(left, right, board):
-                if is_horizontal(left_shifted, right_shifted):
-                    if not visited(left_shifted, right_shifted, visited_horizontal):
-                        queue.append((left_shifted, right_shifted))
+            for sh_left, sh_right in shift_move(left, right, board):
+                if horizontal_orientation(sh_left, sh_right):
+                    if not visited(sh_left, sh_right, h_visited):
+                        queue.append((sh_left, sh_right))
                 else:
-                    if not visited(left_shifted, right_shifted, visited_vertical):
-                        queue.append((left_shifted, right_shifted))
-
-            for left_rotated, right_rotated in rotate(left, right, board):
-                if is_horizontal(left_rotated, right_rotated):
-                    if not visited(left_rotated, right_rotated, visited_horizontal):
-                        queue.append((left_rotated, right_rotated))
+                    if not visited(sh_left, sh_right, v_visited):
+                        queue.append((sh_left, sh_right))
+            for rt_left, rt_right in rotate_move(left, right, board):
+                if horizontal_orientation(rt_left, rt_right):
+                    if not visited(rt_left, rt_right, h_visited):
+                        queue.append((rt_left, rt_right))
                 else:
-                    if not visited(left_rotated, right_rotated, visited_vertical):
-                        queue.append((left_rotated, right_rotated))
+                    if not visited(rt_left, rt_right, v_visited):
+                        queue.append((rt_left, rt_right))
 
         counter += 1
 

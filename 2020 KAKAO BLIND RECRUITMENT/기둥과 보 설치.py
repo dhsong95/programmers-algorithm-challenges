@@ -1,5 +1,11 @@
+def in_boundary(x, y, frames):
+    n = len(frames)
+    return 0 <= x < n and 0 <= y < n
+
+
 def valid_frame(pillars, beams):
     n = len(pillars)
+
     for x in range(n):
         for y in range(n):
             if pillars[x][y] and not valid_pillar(x, y, pillars, beams):
@@ -10,22 +16,32 @@ def valid_frame(pillars, beams):
 
 
 def valid_pillar(x, y, pillars, beams):
+    if not in_boundary(x, y, pillars):
+        return False
+
     if y == 0:
         return True
 
-    if (y > 0 and pillars[x][y-1]):
+    if in_boundary(x, y-1, pillars) and pillars[x][y-1]:
         return True
 
-    if (x > 0 and beams[x-1][y]) or (beams[x][y]):
+    if (in_boundary(x, y, beams) and beams[x][y]) or\
+            (in_boundary(x-1, y, beams) and beams[x-1][y]):
         return True
+
+    return False
 
 
 def valid_beam(x, y, pillars, beams):
-    n = len(pillars)
-    if (y > 0 and pillars[x][y-1]) or (x < n-1 and y > 0 and pillars[x+1][y-1]):
+    if not in_boundary(x, y, beams):
+        return False
+
+    if (in_boundary(x-1, y, beams) and beams[x-1][y]) and\
+            (in_boundary(x+1, y, beams) and beams[x+1][y]):
         return True
 
-    if (x > 0 and beams[x-1][y]) and (x < n-1 and beams[x+1][y]):
+    if (in_boundary(x, y-1, pillars) and pillars[x][y-1]) or\
+            (in_boundary(x+1, y-1, pillars) and pillars[x+1][y-1]):
         return True
 
 
@@ -34,21 +50,19 @@ def construct_pillar(x, y, pillars, beams):
         pillars[x][y] = True
 
 
+def deconstruct_pillar(x, y, pillars, beams):
+    pillars[x][y] = False
+    if not valid_frame(pillars, beams):
+        pillars[x][y] = True
+
+
 def construct_beam(x, y, pillars, beams):
     if valid_beam(x, y, pillars, beams):
         beams[x][y] = True
 
 
-def deconstruct_pillar(x, y, pillars, beams):
-    pillars[x][y] = False
-
-    if not valid_frame(pillars, beams):
-        pillars[x][y] = True
-
-
 def deconstruct_beam(x, y, pillars, beams):
     beams[x][y] = False
-
     if not valid_frame(pillars, beams):
         beams[x][y] = True
 

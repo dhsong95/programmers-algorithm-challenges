@@ -2,46 +2,47 @@ from itertools import permutations
 
 
 def get_weak_combination(n, weak):
-    combination = list()
+    combinations = list()
     for idx in range(len(weak)):
-        w = weak[idx:] + [w+n for w in weak[:idx]]
-        combination.append(w)
+        combination = weak[idx:] + [w+n for w in weak[:idx]]
+        combinations.append(combination)
 
-    return combination
+    return combinations
 
 
-def get_dist_combination(dist, size):
+def get_friend_combination(dist, size):
     return permutations(dist, size)
 
 
-def possible_to_fix(weak, dist):
+def total_fix(weak, dist):
     weak_index = 0
     dist_index = 0
 
-    while dist_index < len(dist) and weak_index < len(weak):
-        target = weak[weak_index] + dist[dist_index]
+    while weak_index < len(weak) and dist_index < len(dist):
+        coverage = weak[weak_index] + dist[dist_index]
 
-        while (weak_index < len(weak)-1) and (weak[weak_index+1] <= target):
+        while weak_index < len(weak)-1 and coverage >= weak[weak_index+1]:
             weak_index += 1
+
         dist_index += 1
         weak_index += 1
 
-    return weak_index == len(weak)
+    return weak_index >= len(weak)
 
 
-def fix_weak(weak_combination, dist_combination):
-    for dist in dist_combination:
+def fix_weak(weak_combination, friend_combination):
+    for dist in friend_combination:
         for weak in weak_combination:
-            if possible_to_fix(weak, dist):
+            if total_fix(weak, dist):
                 return True
     return False
 
 
 def solution(n, weak, dist):
     weak_combination = get_weak_combination(n, weak)
-    for size in range(1, len(dist) + 1):
-        dist_combination = get_dist_combination(dist, size)
-        if fix_weak(weak_combination, dist_combination):
+    for size in range(1, len(dist)+1):
+        friend_combination = get_friend_combination(dist, size)
+        if fix_weak(weak_combination, friend_combination):
             return size
     return -1
 
