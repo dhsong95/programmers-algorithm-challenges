@@ -1,28 +1,24 @@
 from collections import defaultdict
 import sys
-sys.setrecursionlimit(100000000)
+sys.setrecursionlimit(10**9)
 
 
-def dfs(node, graph, visited, delayed, next_prev):
-    if visited[node]:
+def dfs(current, graph, precedents, delayed, visited):
+    if visited[current]:
         return
 
-    qualified = True
-    for prev in next_prev[node]:
-        if not visited[prev]:
-            delayed[prev].append(node)
-            qualified = False
-    if not qualified:
+    if (current in precedents) and (not visited[precedents[current]]):
+        delayed[precedents[current]].append(current)
         return
 
-    visited[node] = True
+    visited[current] = True
 
-    for item in delayed[node]:
-        dfs(item, graph, visited, delayed, next_prev)
-    delayed.pop(node)
+    for node in delayed[current]:
+        dfs(node, graph, precedents, delayed, visited)
+    delayed.pop(current)
 
-    for item in graph[node]:
-        dfs(item, graph, visited, delayed, next_prev)
+    for node in graph[current]:
+        dfs(node, graph, precedents, delayed, visited)
 
 
 def solution(n, path, order):
@@ -31,50 +27,35 @@ def solution(n, path, order):
         graph[a].append(b)
         graph[b].append(a)
 
-    next_prev = defaultdict(list)
+    precedents = defaultdict()
     for a, b in order:
-        next_prev[b].append(a)
+        precedents[b] = a
 
     visited = [False] * n
     delayed = defaultdict(list)
+    dfs(0, graph, precedents, delayed, visited)
 
-    dfs(0, graph, visited, delayed, next_prev)
-
-    counter = visited.count(True)
-    return counter == n
+    return visited.count(True) == n
 
 
 if __name__ == "__main__":
-    assert solution(
-        9,
-        [
-            [0, 1], [0, 3], [0, 7],
+    n = 9
+    path = [[0, 1], [0, 3], [0, 7],
             [8, 1], [3, 6], [1, 2],
-            [4, 7], [7, 5]
-        ],
-        [
-            [8, 5], [6, 7], [4, 1]
-        ]
-    )
-    assert solution(
-        9,
-        [
-            [8, 1], [0, 1], [1, 2],
+            [4, 7], [7, 5]]
+    order = [[8, 5], [6, 7], [4, 1]]
+    assert solution(n, path, order)
+
+    n = 9
+    path = [[8, 1], [0, 1], [1, 2],
             [0, 7], [4, 7], [0, 3],
-            [7, 5], [3, 6]
-        ],
-        [
-            [4, 1], [5, 2]
-        ]
-    )
-    assert not solution(
-        9,
-        [
-            [0, 1], [0, 3], [0, 7],
+            [7, 5], [3, 6]]
+    order = [[4, 1], [5, 2]]
+    assert solution(n, path, order)
+
+    n = 9
+    path = [[0, 1], [0, 3], [0, 7],
             [8, 1], [3, 6], [1, 2],
-            [4, 7], [7, 5]
-        ],
-        [
-            [4, 1], [8, 7], [6, 5]
-        ]
-    )
+            [4, 7], [7, 5]]
+    order = [[4, 1], [8, 7], [6, 5]]
+    assert not solution(n, path, order)

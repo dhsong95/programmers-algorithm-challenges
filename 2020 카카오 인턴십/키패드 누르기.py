@@ -1,51 +1,57 @@
-def get_distance(current, target):
-    left = ['1', '4', '7', '*']
-    right = ['3', '6', '9', '#']
-    center = ['2', '5', '8', '0']
+def calculate_distance(source, target):
+    left_numbers = ['1', '4', '7', '*']
+    right_numbers = ['3', '6', '9', '#']
+    center_numbers = ['2', '5', '8', '0']
 
     distance = 0
-    if current in left:
-        distance += 1
-        current = center[left.index(current)]
-    elif current in right:
-        distance += 1
-        current = center[right.index(current)]
+    if source in left_numbers:
+        distance = 1
+        source = center_numbers[left_numbers.index(source)]
+    elif source in right_numbers:
+        distance = 1
+        source = center_numbers[right_numbers.index(source)]
 
-    distance += abs(center.index(target) - center.index(current))
-
+    distance +=\
+        abs(center_numbers.index(target) - center_numbers.index(source))
     return distance
 
 
-def get_left_or_right(left, right, target, hand):
-    if target in ['1', '4', '7', '*']:
-        return 'L'
-    elif target in ['3', '6', '9', '#']:
-        return 'R'
-    else:
-        l_distance = get_distance(left, target)
-        r_distance = get_distance(right, target)
+def press_button(left, right, target, hand):
+    left_numbers = ['1', '4', '7', '*']
+    right_numbers = ['3', '6', '9', '#']
+    center_numbers = ['2', '5', '8', '0']
 
-        if l_distance < r_distance:
+    if target in left_numbers:
+        return 'L'
+    elif target in right_numbers:
+        return 'R'
+    elif target in center_numbers:
+        distance_left = calculate_distance(left, target)
+        distance_right = calculate_distance(right, target)
+
+        if distance_left < distance_right:
             return 'L'
-        elif l_distance > r_distance:
+        elif distance_left > distance_right:
             return 'R'
         else:
             return 'L' if hand == 'left' else 'R'
 
 
 def solution(numbers, hand):
-    result = ''
-    left = '#'
-    right = '*'
+    answer = ''
+    left = '*'
+    right = '#'
+
     for number in numbers:
-        target = str(number)
-        lr = get_left_or_right(left, right, target, hand)
-        result += lr
-        if lr == 'L':
-            left = target
-        elif lr == 'R':
-            right = target
-    return result
+        number = str(number)
+        direction = press_button(left, right, number, hand)
+        answer += direction
+        if direction == 'L':
+            left = number
+        elif direction == 'R':
+            right = number
+
+    return answer
 
 
 if __name__ == "__main__":

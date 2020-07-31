@@ -10,47 +10,49 @@ def blocked(x, y, board):
     return board[x][y]
 
 
-def calculate_cost(base_cost, base_direction, direction):
-    if base_direction in ['L', 'R'] and direction in ['L', 'R']:
-        return base_cost + 100
-    elif base_direction in ['U', 'D'] and direction in ['U', 'D']:
-        return base_cost + 100
-    elif base_direction in ['L', 'R'] and direction in ['U', 'D']:
-        return base_cost + 600
-    elif base_direction in ['U', 'D'] and direction in ['L', 'R']:
-        return base_cost + 600
+def calculate_cost(cost, orient, next_orient):
+    if orient in ['L', 'R'] and next_orient in ['L', 'R']:
+        return cost + 100
+    elif orient in ['L', 'R'] and next_orient in ['U', 'D']:
+        return cost + 600
+    elif orient in ['U', 'D'] and next_orient in ['U', 'D']:
+        return cost + 100
+    elif orient in ['U', 'D'] and next_orient in ['L', 'R']:
+        return cost + 600
 
 
-def bfs(x, y, direction, board):
+def bfs(x, y, orient, cost, board):
     N = len(board)
+    queue = deque([(x, y, orient, cost)])
+    candidates = [(0, 1, 'R'), (0, -1, 'L'), (1, 0, 'D'), (-1, 0, 'U')]
     cost_matrix = [[0] * N for _ in range(N)]
 
-    queue = deque([(x, y, 0, direction)])
     while queue:
-        x, y, c, d = queue.popleft()
-        for dx, dy, direction in\
-                [(0, 1, 'R'), (0, -1, 'L'), (1, 0, 'D'), (-1, 0, 'U')]:
+        x, y, orient, cost = queue.popleft()
+
+        for dx, dy, o in candidates:
+            if not in_boundary(x+dx, y+dy, board):
+                continue
+            if blocked(x+dx, y+dy, board):
+                continue
+
             next_x = x + dx
             next_y = y + dy
+            next_orient = o
+            next_cost = calculate_cost(cost, orient, next_orient)
 
-            if not in_boundary(next_x, next_y, board):
-                continue
+            if (not cost_matrix[next_x][next_y]) or\
+                    (cost_matrix[next_x][next_y] > next_cost):
+                cost_matrix[next_x][next_y] = next_cost
+                queue.append([next_x, next_y, next_orient, next_cost])
 
-            if blocked(next_x, next_y, board):
-                continue
-
-            next_c = calculate_cost(c, d, direction)
-            if not cost_matrix[next_x][next_y] or\
-                    cost_matrix[next_x][next_y] > next_c:
-                cost_matrix[next_x][next_y] = next_c
-                queue.append((next_x, next_y, next_c, direction))
-
-    return cost_matrix[N-1][N-1] if cost_matrix[N-1][N-1] else -1
+    return cost_matrix[N-1][N-1]
 
 
 def solution(board):
-    cost_right = bfs(0, 0, 'R', board)
-    cost_down = bfs(0, 0, 'D', board)
+    cost_right = bfs(0, 0, 'R', 0, board)
+    cost_down = bfs(0, 0, 'D', 0, board)
+
     return min(max(0, cost_right), max(0, cost_down))
 
 

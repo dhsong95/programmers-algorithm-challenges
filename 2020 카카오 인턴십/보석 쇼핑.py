@@ -3,28 +3,30 @@ from collections import defaultdict
 
 def solution(gems):
     N = len(set(gems))
-    gem_counter = defaultdict(int)
+    gem_shopping = defaultdict(int)
 
-    ldx = 0
-    rdx = 0
-    result = [1, len(gems)]
-    distance = len(gems) - 1
-    gem_counter[gems[0]] = 1
+    ldx = rdx = 0
+    answer = [1, len(gems)]
+    gem_shopping[gems[0]] = 1
 
     while ldx < len(gems) and rdx < len(gems):
-        if len(gem_counter) == N:
-            if max(0, rdx - ldx) < distance:
-                result = [ldx+1, rdx+1]
-                distance = max(0, rdx - ldx)
-            gem_counter[gems[ldx]] -= 1
-            if gem_counter[gems[ldx]] == 0:
-                gem_counter.pop(gems[ldx])
+        if len(gem_shopping) == N:
+            if (rdx - ldx) < (answer[1] - answer[0]):
+                answer = [ldx+1, rdx+1]
+
+            gem_shopping[gems[ldx]] -= 1
+            if not gem_shopping[gems[ldx]]:
+                gem_shopping.pop(gems[ldx])
+
             ldx += 1
+            if ldx > rdx:
+                rdx = ldx
         else:
             rdx += 1
             if rdx < len(gems):
-                gem_counter[gems[rdx]] += 1
-    return result
+                gem_shopping[gems[rdx]] += 1
+
+    return answer
 
 
 if __name__ == "__main__":
